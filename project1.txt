@@ -1,0 +1,51 @@
+/title, project1 for tensile test along transverse direction
+
+/unit, user,     ! mm-N-MPa
+/Prep7           ! start preprocessor
+
+!Define the element types:
+ET,1,Plane183    ! 8-node 2D plane element type for matrix
+ET,2,Plane183    ! 8-node 2D plane element type for fiber
+
+!Matrix Properties (Epoxy):
+MP, EX, 1, 3.5             ! Young's modulus for matrix (3.5 Gpa) (isotropic)
+MP, PRXY, 1, 0.35          ! Poisson's ratio for matrix (0.35)(isotropic)
+
+!Fiber Properties (Carbon Fiber):
+MP, EX, 2, 22.4       ! Young's modulus in x-direction for fiber (22.4 GPa)
+MP, EY, 2, 22.4       ! Young's modulus in y-direction for fiber (22.4 GPa)
+MP, EZ, 2, 250.0      ! Young's modulus in z-direction for fiber (250 GPa)
+MP, GXY, 2, 8.30      ! Shear modulus in xy-plane (8.30 GPa)
+MP, GXZ, 2, 22.1      ! Shear modulus in xz-plane (22.1 GPa)
+MP, GYZ, 2, 22.1      ! Shear modulus in yz-plane (22.1 GPa)
+MP, PRXY, 2, 0.35     ! Poisson's ratio in xy-plane (0.35)
+MP, PRXZ, 2, 0.027    ! Poisson's ratio in xz-plane (0.027)
+MP, PRYZ, 2, 0.027    ! Poisson's ratio in yz-plane (0.027)
+
+
+
+!Create the model or geometry:
+BLC4,0.0,0.0,10.0,10.0   ! Create a rectangular matrix (10 mm x 10 mm)
+CYL4,0.0,0.0,7.0         ! Create a circular fiber with radius 7 mm
+ASBA,1,2,,,keep          ! Subtract the fiber area from the matrix
+
+
+!Mesh the model:
+ESIZE, 2               ! Element size set to 2 mm
+MSHKEY, 2              ! Mapped mesh where possible
+TYPE, 1                ! Matrix elements type 1
+MAT, 1                 ! Assign material 1 (matrix) to the mesh
+AMESH, ALL             ! Mesh all areas
+FINISH
+
+!Apply Boundary Conditions and Loads
+/SOLUTION
+DL, ALL, UX    ! Constrain displacement in X direction along symmetry edge
+DL, ALL, UY    ! Constrain displacement in Y direction along symmetry edge
+SFL,2,PRES,-10      ! Apply pressure load of -10 MPa on the fiber area
+SOLVE               ! Solve the system
+FINISH              ! End solution phase
+
+/eof
+
+
